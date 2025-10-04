@@ -1,3 +1,13 @@
+// Utility function to sanitize email for Firebase path
+function sanitizeEmailForPath(email) {
+    return email.replace(/[.#$\[\]]/g, '_');
+}
+
+// Utility function to get user data path
+function getUserDataPath(email) {
+    return `users/${sanitizeEmailForPath(email)}`;
+}
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCHKYHCt626gdjKAuU-ifuErfxp3g9H3cQ",
@@ -5,29 +15,30 @@ const firebaseConfig = {
   projectId: "finsight-d0a8f",
   storageBucket: "finsight-d0a8f.firebasestorage.app",
   messagingSenderId: "764856226961",
-  appId: "1:764856226961:web:ccdb159c15080e33795b30"
+  appId: "1:764856226961:web:ccdb159c15080e33795b30",
+  databaseURL: "https://finsight-d0a8f-default-rtdb.firebaseio.com"
 };
 const API_TOKEN = 'cuj17q1r01qm7p9n307gcuj17q1r01qm7p9n3080';
 
 // Initialize Firebase with error checking
-let app, auth;
+let auth, database;
 try {
-  if (typeof firebase === 'undefined') {
-    throw new Error('Firebase SDK not loaded');
+  // Check if Firebase is already initialized
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
   }
   
-  app = firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
+  database = firebase.database();
   console.log('Firebase initialized successfully');
 } catch (error) {
   console.error('Firebase initialization failed:', error);
-  // Show error message to user
   setTimeout(() => {
     showMessage('Firebase initialization failed. Please refresh the page.', 'error');
   }, 1000);
 }
 
-// Authentication state tracking
+
 let currentUser = null;
 let isAuthInitialized = false;
 
@@ -72,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
   }
-  // Ticker form - currently just validates and shows placeholder message
+
   if (tickerForm) {
     tickerForm.addEventListener('submit', handleTickerSubmit);
   }
@@ -85,13 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
       e.target.value = e.target.value.toUpperCase();
       // Restore cursor position
       e.target.setSelectionRange(cursorPosition, cursorPosition);
-    });
-    
-    // Also convert on paste
-    stockTickerInput.addEventListener('paste', function(e) {
-      setTimeout(() => {
-        e.target.value = e.target.value.toUpperCase();
-      }, 0);
     });
   }
 
@@ -112,25 +116,14 @@ async function handleRegister(e) {
     return;
   }
 
-  if (password.length < 6) {
-    showMessage('Password must be at least 6 characters long', 'error');
-    return;
-  }
-
-  try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    
-    showMessage('Account created successfully!', 'success');
-    console.log('User registered:', user.email);
-    
-    // Clear form
-    document.getElementById('registerForm').reset();
-    
-  } catch (error) {
-    showMessage(getErrorMessage(error.code), 'error');
-    console.error('Registration error:', error);
-  }
+  const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+  const user = userCredential.user;
+  
+  showMessage('Account created successfully!', 'success');
+  console.log('User registered:', user.email);
+  
+  // Clear form
+  document.getElementById('registerForm').reset();
 }
 
 // Handle user login
@@ -187,7 +180,6 @@ function setupAuthStateListener() {
       currentUser = user;
       console.log('User is authenticated:', user.email);
       showMainContent(user);
-      initializeNewsAnalyzer();
     } else {
       // User is signed out
       currentUser = null;
@@ -217,9 +209,6 @@ function showMainContent(user) {
       newLogoutBtn.addEventListener('click', handleLogout);
     }
   }
-  
-  // Initialize protected features
-  initializeProtectedFeatures();
 }
 
 // Show authentication forms when user is not authenticated
@@ -284,131 +273,12 @@ function toggleAuthMode() {
 // Make toggle function globally available
 window.toggleAuthMode = toggleAuthMode;
 
-// Financial News Analyzer specific functions will go here
-function initializeNewsAnalyzer() {
-  // This is where you'll add your financial news analysis functionality
-  console.log('Financial News Analyzer initialized for authenticated user');
-  
-  // Placeholder for news analysis features
-  // You can add APIs for fetching financial news, sentiment analysis, etc.
-}
-
-// Initialize protected features that require authentication
-function initializeProtectedFeatures() {
-  if (!isUserAuthenticated()) {
-    console.log('Cannot initialize protected features - user not authenticated');
-    return;
-  }
-  
-  console.log('Initializing protected features for:', currentUser.email);
-  
-  // Add click handlers for protected features
-  setupProtectedFeatureHandlers();
-  
-  // Load user's financial data (placeholder)
-  loadUserFinancialData();
-}
-
-// Setup handlers for features that require authentication
-function setupProtectedFeatureHandlers() {
-  // Add protected functionality to feature cards
-  const featureCards = document.querySelectorAll('.feature-card');
-  featureCards.forEach(card => {
-    card.addEventListener('click', () => {
-      requireAuth(() => {
-        const feature = card.querySelector('h3').textContent;
-        handleFeatureClick(feature);
-      });
-    });
-  });
-}
-
-// Handle clicks on protected features
-function handleFeatureClick(feature) {
-  console.log(`User ${currentUser.email} accessed feature: ${feature}`);
-  
-  switch(feature) {
-    case '📈 Market Analysis':
-      showMessage('Loading market analysis...', 'success');
-      // Add your market analysis logic here
-      break;
-    case '📰 News Sentiment':
-      showMessage('Analyzing news sentiment...', 'success');
-      // Add your news sentiment analysis logic here
-      break;
-    case '📊 Portfolio Insights':
-      showMessage('Loading portfolio insights...', 'success');
-      // Add your portfolio analysis logic here
-      break;
-    case '🔔 Smart Alerts':
-      showMessage('Setting up smart alerts...', 'success');
-      // Add your alerts logic here
-      break;
-    default:
-      showMessage('Feature coming soon!', 'success');
-  }
-}
-
-// Load user-specific financial data (protected function)
-function loadUserFinancialData() {
-  if (!isUserAuthenticated()) {
-    console.log('Cannot load financial data - user not authenticated');
-    return;
-  }
-  
-  console.log('Loading financial data for user:', currentUser.email);
-  
-  // Placeholder for loading user's financial data
-  // This is where you'd typically make API calls to fetch user-specific data
-  const newsContainer = document.getElementById('newsContainer');
-  if (newsContainer) {
-    newsContainer.innerHTML = `
-      <div class="protected-content">
-        <h3>Your Personalized Financial News</h3>
-        <p>Welcome back, ${currentUser.email}!</p>
-        <p>This section would contain personalized financial news and analysis based on your preferences.</p>
-        <div class="news-items">
-          <div class="news-item">
-            <h4>Sample News Item 1</h4>
-            <p>This is where real financial news would appear...</p>
-          </div>
-          <div class="news-item">
-            <h4>Sample News Item 2</h4>
-            <p>Integrate with financial news APIs to show real data...</p>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-  
-  const analysisContainer = document.getElementById('analysisContainer');
-  if (analysisContainer) {
-    analysisContainer.innerHTML = `
-      <div class="protected-content">
-        <h3>Your Market Analysis Dashboard</h3>
-        <p>User: ${currentUser.email}</p>
-        <p>This section would contain your personalized market analysis and portfolio insights.</p>
-        <div class="analysis-widgets">
-          <div class="widget">
-            <h4>Portfolio Performance</h4>
-            <p>Your portfolio data would appear here...</p>
-          </div>
-          <div class="widget">
-            <h4>Market Trends</h4>
-            <p>Personalized market trend analysis...</p>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
 // Ticker Analysis Functions (Currently Disabled)
 async function handleTickerSubmit(e) {
   e.preventDefault();
   
-  if (!isUserAuthenticated()) {
-    showMessage('Please log in to analyze stocks', 'error');
+  // Check if user is authenticated
+  if (!requireAuth(() => true)) {
     return;
   }
   
@@ -438,7 +308,7 @@ async function handleTickerSubmit(e) {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Analyzing...';
   
-  // Just log the ticker for now - no analysis implementation
+  // Logging the ticker and user email
   console.log(`Ticker entered: ${ticker} by user: ${currentUser.email}`);
 
   try {
@@ -448,9 +318,6 @@ async function handleTickerSubmit(e) {
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
   }
-  
-  // Analysis functionality will be implemented later
-  // TODO: Implement real stock analysis here
 }
 
 
@@ -461,20 +328,12 @@ function selectTicker(ticker) {
     const upperTicker = ticker.toUpperCase();
     stockTickerInput.value = upperTicker;
     stockTickerInput.focus();
-    
-    // Optional: Show message that ticker was selected
-    console.log(`Ticker ${upperTicker} selected from suggestions`);
   }
 }
 
 // Make selectTicker function globally available
 window.selectTicker = selectTicker;
 
-
-
-
-
-// analyze.js
 
 // This function renders the articles.
 function renderArticles(articles, containerId) {
@@ -496,9 +355,49 @@ function renderArticles(articles, containerId) {
     container.innerHTML = htmlContent;
 }
 
-// This function fetches data FROM YOUR PYTHON SERVER
+// Function to save search history to Firebase
+async function saveSearchHistory(ticker, positiveArticles, negativeArticles) {
+    if (!currentUser || !database) {
+        console.error('User not authenticated or database not initialized');
+        return;
+    }
+
+    try {
+        const searchData = {
+            ticker: ticker,
+            userRequestTimestamp: firebase.database.ServerValue.TIMESTAMP,
+            articles: {
+                positiveScore: positiveArticles.map(article => ({
+                    headline: article.headline,
+                    summary: article.summary || '',
+                    url: article.url,
+                    publishedAt: article.datetime || Date.now(),
+                    sentimentScore: article.sentimentScore
+                })),
+                negativeScore: negativeArticles.map(article => ({
+                    headline: article.headline,
+                    summary: article.summary || '',
+                    url: article.url,
+                    publishedAt: article.datetime || Date.now(),
+                    sentimentScore: article.sentimentScore
+                }))
+            }
+        };
+
+        // Create a new entry in the user's search history using their email
+        const userPath = getUserDataPath(currentUser.email);
+        const userSearchHistoryRef = database.ref(`${userPath}`);
+        await userSearchHistoryRef.push(searchData);
+        console.log('Search history saved successfully for:', currentUser.email);
+    } catch (error) {
+        console.error('Error saving search history:', error);
+        showMessage('Failed to save search history', 'error');
+    }
+}
+
+// This function fetches data FROM THE PYTHON SERVER
 async function fetchDataFromServer(ticker) {
-    const symbol = ticker; // You can make this dynamic later
+    const symbol = ticker;
     
     // Show loading state
     showMessage('Analyzing stock data...', 'info');
@@ -532,6 +431,9 @@ async function fetchDataFromServer(ticker) {
         renderArticles(data.positive, 'positive-articles');
         renderArticles(data.negative, 'negative-articles');
         
+        // Save search history to Firebase
+        await saveSearchHistory(symbol, data.positive, data.negative);
+        
         // Show success message
         showMessage(`Analysis complete for ${symbol}!`, 'success');
         
@@ -547,6 +449,3 @@ async function fetchDataFromServer(ticker) {
         }
     }
 }
-
-// Run the function
-// fetchDataFromServer();

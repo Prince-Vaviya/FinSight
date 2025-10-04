@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinSight - Financial News Analyzer</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
     <!-- Message container for notifications -->
@@ -80,7 +84,7 @@
             
             <!-- Stock Ticker Input Section -->
             <section class="ticker-section">
-                <h3>Analyze Stock</h3>
+                <h3>Analyze Stock - <em><u>US Market ONLY</u></em></h3>
                 <div class="ticker-input-container">
                     <form id="tickerForm" class="ticker-form">
                         <div class="input-group">
@@ -117,10 +121,6 @@
             </section>
         </main>
     </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="analyze.js"></script>
 </body>
 </html>

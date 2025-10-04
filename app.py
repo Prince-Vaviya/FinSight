@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
@@ -7,7 +6,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing
+CORS(app)
 
 # Finnhub API Token
 API_TOKEN = 'cuj17q1r01qm7p9n307gcuj17q1r01qm7p9n3080'
