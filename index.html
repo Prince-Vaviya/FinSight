@@ -81,6 +81,54 @@
                 <h2>Welcome to FinSight</h2>
                 <p>The financial news analyzer.</p>
             </section>
+
+            <!-- Subscription Plans Section -->
+            <section class="subscription-section">
+                <div class="subscription-card" id="subscriptionCard">
+                    <div class="card-header" onclick="toggleSubscriptionDetails()">
+                        <h3>New Features Coming Soon</h3>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="subscription-details" id="subscriptionDetails">
+                        <div class="plan">
+                            <span class="tier-label free-label">FREE</span>
+                            <h4>Free: Coin Buzz</h4>
+                            <ul>
+                                <li>Real-time market updates</li>
+                                <li>Basic stock analysis</li>
+                                <li>Daily market insights</li>
+                            </ul>
+                            <div class="plan-footer">
+                                <button class="know-more-btn">Know More</button>
+                            </div>
+                        </div>
+                        <div class="plan">
+                            <span class="tier-label popular-label">POPULAR</span>
+                            <h4>Paid: Surge Spark</h4>
+                            <ul>
+                                <li>Advanced technical analysis</li>
+                                <li>Custom stock alerts</li>
+                                <li>Portfolio tracking</li>
+                            </ul>
+                            <div class="plan-footer">
+                                <button class="know-more-btn">Know More</button>
+                            </div>
+                        </div>
+                        <div class="plan">
+                            <span class="tier-label best-label">BEST VALUE</span>
+                            <h4>Premium: Gold Rush</h4>
+                            <ul>
+                                <li>AI-powered predictions</li>
+                                <li>Expert market analysis</li>
+                                <li>Priority customer support</li>
+                            </ul>
+                            <div class="plan-footer">
+                                <button class="know-more-btn">Know More</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             
             <!-- Stock Ticker Input Section -->
             <section class="ticker-section">
@@ -122,5 +170,62 @@
         </main>
     </div>
     <script src="analyze.js"></script>
+    <script>
+        function toggleSubscriptionDetails() {
+            const details = document.getElementById('subscriptionDetails');
+            const icon = document.querySelector('.expand-icon');
+            const card = document.getElementById('subscriptionCard');
+            const plans = document.querySelectorAll('.plan');
+            
+            if (details.classList.contains('expanded')) {
+                // Collapse animation
+                icon.style.transform = 'rotate(0)';
+                details.style.overflow = 'hidden';
+                
+                // Hide plans first with fade out
+                plans.forEach(plan => {
+                    plan.style.opacity = '0';
+                    plan.style.transform = 'translateY(20px)';
+                });
+                
+                setTimeout(() => {
+                    details.classList.remove('expanded');
+                }, 200);
+            } else {
+                // Expand animation
+                details.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+                
+                // Reset plan visibility for animation
+                plans.forEach(plan => {
+                    plan.style.opacity = '';
+                    plan.style.transform = '';
+                });
+                
+                // Smooth scroll to card if it's not in view
+                const rect = card.getBoundingClientRect();
+                if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        // Add event listeners for the "Know More" buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all "Know More" buttons
+            const knowMoreButtons = document.querySelectorAll('.know-more-btn');
+            
+            // Add click event listener to each button to prevent bubbling
+            knowMoreButtons.forEach((button) => {
+                button.addEventListener('click', function(event) {
+                    // Prevent event bubbling (so it doesn't trigger the card toggle)
+                    event.stopPropagation();
+                    
+                    // No functionality for now
+                    console.log('Know More button clicked - no action configured');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

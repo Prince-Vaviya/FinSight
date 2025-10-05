@@ -32,7 +32,6 @@ def analyze_sentiment():
         response = requests.get('https://finnhub.io/api/v1/company-news', params=params)
         response.raise_for_status()
         articles = response.json()
-        print(articles)
 
         if not articles:
             return jsonify({"positive": [], "negative": []})
