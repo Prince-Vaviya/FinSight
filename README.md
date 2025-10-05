@@ -12,7 +12,7 @@ FinSight is a web application designed to provide financial news sentiment for s
 
 ---
 
-## Setup and Configuration
+## Backend : 
 
 - **Flask App**: Initialized with CORS enabled for all origins to support cross-origin requests.
 - **MongoDB**: Connects to `mongodb://localhost:27017` using `pymongo`.
@@ -171,7 +171,7 @@ Tracks user interactions with subscription plans:
     "premium": 0
   },
   "createdat": "2025-10-05T10:00:00Z",
-  "lastupdated": "2025-10-06T01:00:00Z"
+  // "lastupdated": "2025-10-06T01:00:00Z"
 }
 ```
 
