@@ -1175,3 +1175,11 @@ body {
 .score { font-weight: bold; }
 .positive { color: #28a745; }
 .negative { color: #dc3545; }
+
+.positive-articles{
+    background-color: hsl(134, 61%, 75%);
+}
+
+.negative-articles{
+    background-color: hsl(0, 91%, 70%);
+}
