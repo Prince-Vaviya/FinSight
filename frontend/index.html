@@ -246,24 +246,6 @@
                 showMessage('Failed to record activity', 'error');
             }
         }
-
-        // Function to get user's click statistics (optional - for future use)
-        async function getUserClickStats() {
-            try {
-                const user = firebase.auth().currentUser;
-                if (!user) return null;
-
-                const response = await fetch(`http://127.0.0.1:5000/get-clicks/${encodeURIComponent(user.email)}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    return data.clicks;
-                }
-            } catch (error) {
-                console.error('Error getting click stats:', error);
-            }
-            return null;
-        }
         
         // Add event listeners for the "Know More" buttons
         document.addEventListener('DOMContentLoaded', function() {

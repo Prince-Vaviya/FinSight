@@ -131,31 +131,5 @@ def track_click():
     except Exception as e:
         return jsonify({"error": f"Failed to track click: {str(e)}"}), 500
 
-# API endpoint to get user's click statistics
-@app.route('/get-clicks/<user_email>', methods=['GET'])
-def get_clicks(user_email):
-    try:
-        user_record = user_leads_collection.find_one({"email": user_email})
-        
-        if user_record:
-            return jsonify({
-                "success": True,
-                "email": user_email,
-                "clicks": user_record["clicks"],
-                "total_clicks": sum(user_record["clicks"].values()),
-                "last_updated": user_record["last_updated"]
-            })
-        else:
-            return jsonify({
-                "success": True,
-                "email": user_email,
-                "clicks": {"free": 0, "paid": 0, "premium": 0},
-                "total_clicks": 0,
-                "message": "No click data found for this user"
-            })
-            
-    except Exception as e:
-        return jsonify({"error": f"Failed to get click data: {str(e)}"}), 500
-
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
