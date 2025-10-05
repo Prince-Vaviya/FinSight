@@ -210,37 +210,59 @@
             }
         }
 
-        // Global variables for button click counts
-        let freeButtonClicks = 0;
-        let paidButtonClicks = 0;
-        let premiumButtonClicks = 0;
-        
-        // Function to update button counters
-        function updateButtonCounters() {
-            // Get stored counters from localStorage or initialize if not present
-            const storedCounts = JSON.parse(localStorage.getItem('knowMoreClickCounts')) || {
-                'free': 0,
-                'paid': 0,
-                'premium': 0
-            };
-            
-            // Update global variables
-            freeButtonClicks = storedCounts.free;
-            paidButtonClicks = storedCounts.paid;
-            premiumButtonClicks = storedCounts.premium;
-            
-            return storedCounts;
+        // Function to track button click via API
+        async function trackButtonClick(planType) {
+            try {
+                // Get current user
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.error('User not authenticated');
+                    showMessage('Please log in to track your activity', 'error');
+                    return;
+                }
+
+                const response = await fetch('http://127.0.0.1:5000/track-click', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_email: user.email,
+                        plan_type: planType
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`${planType} plan "Know More" clicked ${data.click_count} times`);
+                    showMessage(`Interest in ${planType} plan recorded!`, 'success');
+                } else {
+                    console.error('Failed to track click:', data.error);
+                    showMessage('Failed to record activity', 'error');
+                }
+            } catch (error) {
+                console.error('Error tracking click:', error);
+                showMessage('Failed to record activity', 'error');
+            }
         }
-        
-        // Function to save counter values
-        function saveButtonCounters() {
-            const counters = {
-                'free': freeButtonClicks,
-                'paid': paidButtonClicks,
-                'premium': premiumButtonClicks
-            };
-            localStorage.setItem('knowMoreClickCounts', JSON.stringify(counters));
-            return counters;
+
+        // Function to get user's click statistics (optional - for future use)
+        async function getUserClickStats() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return null;
+
+                const response = await fetch(`http://127.0.0.1:5000/get-clicks/${encodeURIComponent(user.email)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return data.clicks;
+                }
+            } catch (error) {
+                console.error('Error getting click stats:', error);
+            }
+            return null;
         }
         
         // Add event listeners for the "Know More" buttons
@@ -248,38 +270,24 @@
             // Get all "Know More" buttons
             const knowMoreButtons = document.querySelectorAll('.know-more-btn');
             
-            // Initialize button click counters
-            updateButtonCounters();
-            
             // Add click event listener to each button
             // First button - Free plan
             knowMoreButtons[0].addEventListener('click', function(event) {
                 event.stopPropagation();
-                freeButtonClicks++;
-                saveButtonCounters();
-                console.log(`Free plan "Know More" clicked ${freeButtonClicks} times`);
+                trackButtonClick('free');
             });
             
             // Second button - Paid plan
             knowMoreButtons[1].addEventListener('click', function(event) {
                 event.stopPropagation();
-                paidButtonClicks++;
-                saveButtonCounters();
-                console.log(`Paid plan "Know More" clicked ${paidButtonClicks} times`);
+                trackButtonClick('paid');
             });
             
             // Third button - Premium plan
             knowMoreButtons[2].addEventListener('click', function(event) {
                 event.stopPropagation();
-                premiumButtonClicks++;
-                saveButtonCounters();
-                console.log(`Premium plan "Know More" clicked ${premiumButtonClicks} times`);
+                trackButtonClick('premium');
             });
-            
-            // Log the current click counts on page load
-            console.log('Current click counts - Free:', freeButtonClicks, 
-                        'Paid:', paidButtonClicks, 
-                        'Premium:', premiumButtonClicks);
         });
     </script>
 </body>

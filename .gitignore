@@ -3,11 +3,6 @@ venv/
 __pycache__/
 *.pyc
 
-# Project specific files
-DREADME.md
-UREADME.md
-
-
 # Logs
 logs
 *.log
