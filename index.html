@@ -210,21 +210,76 @@
             }
         }
 
+        // Global variables for button click counts
+        let freeButtonClicks = 0;
+        let paidButtonClicks = 0;
+        let premiumButtonClicks = 0;
+        
+        // Function to update button counters
+        function updateButtonCounters() {
+            // Get stored counters from localStorage or initialize if not present
+            const storedCounts = JSON.parse(localStorage.getItem('knowMoreClickCounts')) || {
+                'free': 0,
+                'paid': 0,
+                'premium': 0
+            };
+            
+            // Update global variables
+            freeButtonClicks = storedCounts.free;
+            paidButtonClicks = storedCounts.paid;
+            premiumButtonClicks = storedCounts.premium;
+            
+            return storedCounts;
+        }
+        
+        // Function to save counter values
+        function saveButtonCounters() {
+            const counters = {
+                'free': freeButtonClicks,
+                'paid': paidButtonClicks,
+                'premium': premiumButtonClicks
+            };
+            localStorage.setItem('knowMoreClickCounts', JSON.stringify(counters));
+            return counters;
+        }
+        
         // Add event listeners for the "Know More" buttons
         document.addEventListener('DOMContentLoaded', function() {
             // Get all "Know More" buttons
             const knowMoreButtons = document.querySelectorAll('.know-more-btn');
             
-            // Add click event listener to each button to prevent bubbling
-            knowMoreButtons.forEach((button) => {
-                button.addEventListener('click', function(event) {
-                    // Prevent event bubbling (so it doesn't trigger the card toggle)
-                    event.stopPropagation();
-                    
-                    // No functionality for now
-                    console.log('Know More button clicked - no action configured');
-                });
+            // Initialize button click counters
+            updateButtonCounters();
+            
+            // Add click event listener to each button
+            // First button - Free plan
+            knowMoreButtons[0].addEventListener('click', function(event) {
+                event.stopPropagation();
+                freeButtonClicks++;
+                saveButtonCounters();
+                console.log(`Free plan "Know More" clicked ${freeButtonClicks} times`);
             });
+            
+            // Second button - Paid plan
+            knowMoreButtons[1].addEventListener('click', function(event) {
+                event.stopPropagation();
+                paidButtonClicks++;
+                saveButtonCounters();
+                console.log(`Paid plan "Know More" clicked ${paidButtonClicks} times`);
+            });
+            
+            // Third button - Premium plan
+            knowMoreButtons[2].addEventListener('click', function(event) {
+                event.stopPropagation();
+                premiumButtonClicks++;
+                saveButtonCounters();
+                console.log(`Premium plan "Know More" clicked ${premiumButtonClicks} times`);
+            });
+            
+            // Log the current click counts on page load
+            console.log('Current click counts - Free:', freeButtonClicks, 
+                        'Paid:', paidButtonClicks, 
+                        'Premium:', premiumButtonClicks);
         });
     </script>
 </body>
