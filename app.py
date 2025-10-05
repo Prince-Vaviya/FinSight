@@ -6,7 +6,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Finnhub API Token
 API_TOKEN = 'cuj17q1r01qm7p9n307gcuj17q1r01qm7p9n3080'
@@ -20,7 +20,7 @@ def analyze_sentiment():
 
     try:
         end_date = datetime.now()
-        start_date = end_date - timedelta(days=1)
+        start_date = end_date - timedelta(days=7)
         
         params = {
             'symbol': symbol,
@@ -32,6 +32,7 @@ def analyze_sentiment():
         response = requests.get('https://finnhub.io/api/v1/company-news', params=params)
         response.raise_for_status()
         articles = response.json()
+        print(articles)
 
         if not articles:
             return jsonify({"positive": [], "negative": []})
